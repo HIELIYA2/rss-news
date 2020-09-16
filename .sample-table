@@ -1,0 +1,7 @@
+CREATE TABLE News (
+    ID int NOT NULL AUTO_INCREMENT,
+    Title varchar(255),
+    PubDate DATETIME,
+    Content varchar(255),
+    PRIMARY KEY (ID)
+);

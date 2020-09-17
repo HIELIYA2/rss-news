@@ -1,33 +1,6 @@
 const Message = require('../app/controllers/message.js');
-const Parser = require('rss-parser');
-let parser = new Parser();
-
-exports.rssData = async (url) => {
-  let feed = await parser
-    .parseURL(url)
-    .then((res) => {
-      console.log('!!!!!!!!!', res);
-    })
-    .catch((err) => {
-      console.log('???????????', err);
-    });
-  console.log(feed);
-  Promise.all(
-    feed.items.map((item) => ({
-      Title: item.title,
-      PubDate: item.pubDate,
-      Content: convertCharts(item.content),
-    }))
-  )
-    .catch((err) => {
-      console.log('1111111111', err);
-    })
-    .then((value) => {
-      value.map((i) => {
-        Message.create(i);
-      });
-    });
-};
+const request = require('request');
+var parseString = require('xml2js').parseString;
 
 let convertCharts = (str) => {
   return str
@@ -37,3 +10,23 @@ let convertCharts = (str) => {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 };
+
+exports.rssData  = async (url) => {
+  console.log("1");
+  const xml = await request(url,  (error, response, body) => {return body})
+  console.log("2" , xml);
+  const feed = await parseString(xml, (err, result) => {return result.rss.channel[0].item})
+  console.log("3" , feed);
+  Promise.all(
+    feed.map((item) => ({
+      Title: item.title,
+      PubDate: item.pubDate,
+      Content: convertCharts(item.description),
+    }))
+    ).then((value) => {
+      value.map((i) => {
+        console.log(value);
+        Message.create(i);
+      });
+    });
+}

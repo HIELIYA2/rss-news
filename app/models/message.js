@@ -8,15 +8,24 @@ const Message = function (message) {
 };
 
 Message.create = (newMessage, result) => {
-  sql.query('INSERT INTO news SET ?', newMessage, (err, res) => {
-    if (err) {
-      console.log('error: ', err);
-      result(err, null);
-      return;
+  sql.query(
+    `INSERT INTO news (Title, PubDate, Content)
+      SELECT * FROM (SELECT '${newMessage['Title']}'  AS Title,
+       '${newMessage['PubDate']}' AS PubDate,
+       '${newMessage['Content']}' AS Content) AS tmp
+      WHERE NOT EXISTS (
+          SELECT Title FROM news WHERE Title = '${newMessage['Title']}'
+      ) LIMIT 1;`,
+    (err, res) => {
+      if (err) {
+        console.log('error: ', err);
+        result(err, null);
+        return;
+      }
+      console.log('created message: ', { ...newMessage });
+      result(null, { ...newMessage });
     }
-    console.log('created message: ', { id: res.insertId, ...newMessage });
-    result(null, { id: res.insertId, ...newMessage });
-  });
+  );
 };
 
 Message.findById = (messageId, result) => {

@@ -2,18 +2,15 @@ const Message = require('../models/message.js');
 
 // Create and Save a new Message
 exports.create = (req, res, next) => {
+  // console.log(req);
   // Create a Message
   const message = new Message({
-    Title: req.body.Title,
-    PubDate: req.body.PubDate,
-    Content: req.body.Content,
+    Title: req.Title,
+    PubDate: req.PubDate,
+    Content: req.Content,
   });
-
   // Save Message in the database
-  Message.create(message, (err, data) => {
-    console.log(err);
-    err ? next(err) : res.send(data);
-  });
+  Message.create(message, (err, data) => {});
 };
 
 // Retrieve all Messages from the database.
